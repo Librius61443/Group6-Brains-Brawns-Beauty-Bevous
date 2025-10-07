@@ -3,8 +3,8 @@
 ##HealthApp
 **Project Docs**
 - **Wiki**
-- [Wiki Home] (. / . /wiki)
-- [Design (Wiki)] (/ /wiki/Design) <!-- published in Part B -->
+- [Wiki Home] (https://github.com/Librius61443/Group6-Brains-Brawns-Beauty-Bevous/wiki)
+- [Design (Wiki)] (https://github.com/Librius61443/Group6-Brains-Brawns-Beauty-Bevous/wiki/Design) 
 - [Proposal (Wiki) ] (/./wiki/Proposal) ‹!-- placeholder for Week 6 --›
 
 - **In-Repo Drafts (reviewed via PRs) **
