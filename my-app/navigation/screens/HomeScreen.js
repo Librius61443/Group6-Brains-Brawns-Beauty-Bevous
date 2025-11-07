@@ -88,7 +88,7 @@ export default function HomeScreen() {
                     </View>
                 )}
                   contentContainerStyle={styles.list}
-                  ListEmptyComponent={<Text style={styles.empty}>No logs yet — add your first workout.</Text>}
+                  ListEmptyComponent={<Text style={styles.empty}>No exercises yet — add your first workout.</Text>}
               />
           <LocalNotificationsHandler />
 

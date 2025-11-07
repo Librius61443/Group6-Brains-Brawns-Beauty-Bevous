@@ -49,7 +49,11 @@ export default function CalendarScreen({ navigation }) {
     const [logs, setLogs] = useState([]);
     // const [showForm, setShowForm] = useState(false);
 
-    const [activeDay, setActiveDay] = useState(null);
+    // default selected day = today (0 = Sunday ... 6 = Saturday)
+    const todayId = new Date().getDay().toString();
+    const [selectedDay, setSelectedDay] = useState(todayId);
+    const [showDropdown, setShowDropdown] = useState(false);
+    const [activeDay, setActiveDay] = useState(null); // used to show the add/edit form when equals selectedDay
 
     
     function addLog(newLog) {
@@ -64,7 +68,7 @@ export default function CalendarScreen({ navigation }) {
         storeData('logs', JSON.stringify(updatedLogs));
     }
     
-    // Group logs by day id
+    // Group logs by day id for quick lookup
     const logsByDay = days.reduce((acc, day) => {
         acc[day.id] = [];
         return acc;
@@ -77,94 +81,131 @@ export default function CalendarScreen({ navigation }) {
 
     return (
         <View style={styles.container}>
-            <FlatList
-                data={days}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => (
-                    <View style={{ flexDirection: 'column' }}>
-                        <View style={styles.logItemRow}>
-                            <Text style={styles.exercise}>{item.day}</Text>
+            {/* Header row for selected day with Add button */}
+            <View style={styles.logItemRow}>
+                {/* Dropdown selector for day of week */}
+                <View style={{position: 'relative', zIndex: 9999 }}>
+                    <TouchableOpacity
+                        onPress={() => setShowDropdown(!showDropdown)}
+                        style={{
+                            borderWidth: 1,
+                            borderColor: '#ccc',
+                            paddingVertical: 10,
+                            paddingHorizontal: 12,
+                            borderRadius: 8,
+                            backgroundColor: '#fff',
+                            minWidth: 150
+                        }}
+                    >
+                        <Text style={{ fontSize: 16 }}>{days.find(d => d.id === selectedDay)?.day || 'Select day'}</Text>
+                        <Text style={{ position: 'absolute', right: 10, top: 14, fontSize: 12 }}>{showDropdown ? '▲' : '▼'}</Text>
+                    </TouchableOpacity>
 
-                            {activeDay === item.id ? null : (
+                    {showDropdown ? (
+                        <View
+                            style={{
+                                position: 'absolute',
+                                top: 52,
+                                left: 0,
+                                right: 0,
+                                borderWidth: 1,
+                                borderColor: '#ddd',
+                                borderRadius: 8,
+                                backgroundColor: '#fff',
+                                zIndex: 9999,
+                                elevation: 6,
+                                shadowColor: '#000',
+                                shadowOffset: { width: 0, height: 2 },
+                                shadowOpacity: 0.15,
+                                shadowRadius: 4,
+                            }}
+                        >
+                            {days.map(d => (
                                 <TouchableOpacity
-                                    style={[styles.addButton, { paddingVertical: 6, paddingHorizontal: 12, borderRadius: 8 }]}
+                                    key={d.id}
                                     onPress={() => {
-                                        setActiveDay(item.id);
-                                        setPlaceholders({
-                                            exercise: 'Exercise',
-                                            reps: 'Reps',
-                                            weight: 'Weight (lbs)'
-                                        });
-                                    }}
-                                >
-                                    <Text style={styles.addButtonText}>+ Add</Text>
-                                </TouchableOpacity>
-                            )}
-                        </View>
-                        {activeDay === item.id ? (
-                            <View>
-                                <LogForm
-                                    onCancel={() => setActiveDay(null)}
-                                    onSave={(newLog) => {
-                                        
-                                        // Normalize exercise name (optional: lowercase + trim)
-                                        const newExercise = newLog.exercise.trim().toLowerCase();
-
-                                        // Check if this exercise already exists for this day
-                                        const alreadyExists = logs.some(
-                                        (log) => log.dayId === item.id && log.exercise.trim().toLowerCase() === newExercise
-                                        );
-
-                                        if (alreadyExists) {
-                                            editLog({ ...newLog, dayId: item.id, id: logs.find(log => log.dayId === item.id && log.exercise.trim().toLowerCase() === newExercise).id });
-                                            setActiveDay(null);
-                                            return; // stop execution
-                                        }
-
-                                        // Attach the dayId to the log
-                                        addLog({ ...newLog, dayId: item.id, id: Date.now().toString() });
+                                        setSelectedDay(d.id);
+                                        setShowDropdown(false);
+                                        // close any inline form from a previously selected day
                                         setActiveDay(null);
-                                        
                                     }}
-                                    placeholderExercise={placeholders.exercise}
-                                    placeholderReps={placeholders.reps}
-                                    placeholderWeight={placeholders.weight}
-                                />
-                            </View>
-                        ) : null}
+                                    style={{ padding: 10, borderBottomWidth: 1, borderBottomColor: '#f2f2f2' }}
+                                >
+                                    <Text style={{ fontSize: 15 }}>{d.day}</Text>
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+                    ) : null}
+                </View>
 
-                            <FlatList
-                                data={logsByDay[item.id]}
-                                keyExtractor={(log) => log.id}
-                                renderItem={({ item: log }) => (
-                                <LogItem 
-                                    item={log} 
-                                    checkBox={false} 
-                                    onDelete={(id) => {
-                                    const updatedLogs = logs.filter((l) => l.id !== id);
-                                    setLogs(updatedLogs);
+                {activeDay === selectedDay ? null : (
+                    <TouchableOpacity
+                        style={[styles.addButton, { paddingVertical: 6, paddingHorizontal: 12, borderRadius: 8 }]}
+                        onPress={() => {
+                            setActiveDay(selectedDay);
+                            setPlaceholders({
+                                exercise: 'Exercise',
+                                reps: 'Reps',
+                                weight: 'Weight (lbs)'
+                            });
+                        }}
+                    >
+                        <Text style={styles.addButtonText}>+ Add</Text>
+                    </TouchableOpacity>
+                )}
+            </View>
 
-                                    // Persist changes
-                                    storeData('logs', JSON.stringify(updatedLogs));
-                                    }}
-                                    setOnEdit={() => {
-                                        setActiveDay(item.id);
-                                        // Get info of this log for the placeholders
-                                        setPlaceholders({
-                                            exercise: log.exercise || 'Exercise',
-                                            reps: log.reps || 'Reps',
-                                            weight: log.weight || 'Weight (lbs)'
-                                        });
-                                    }}
-                                    onEdit={true}
-                                />
-                            )}
-                                contentContainerStyle={styles.list}
-                                ListEmptyComponent={<Text style={styles.empty}>No logs yet — add your first workout.</Text>}
-                            />
-                    </View>
+            {activeDay === selectedDay ? (
+                <View>
+                    <LogForm
+                        onCancel={() => setActiveDay(null)}
+                        onSave={(newLog) => {
+                            const newExercise = newLog.exercise.trim().toLowerCase();
+                            const alreadyExists = logs.some(
+                                (log) => log.dayId === selectedDay && log.exercise.trim().toLowerCase() === newExercise
+                            );
+
+                            if (alreadyExists) {
+                                editLog({ ...newLog, dayId: selectedDay, id: logs.find(log => log.dayId === selectedDay && log.exercise.trim().toLowerCase() === newExercise).id });
+                                setActiveDay(null);
+                                return;
+                            }
+
+                            addLog({ ...newLog, dayId: selectedDay, id: Date.now().toString() });
+                            setActiveDay(null);
+                        }}
+                        placeholderExercise={placeholders.exercise}
+                        placeholderReps={placeholders.reps}
+                        placeholderWeight={placeholders.weight}
+                    />
+                </View>
+            ) : null}
+
+            <FlatList
+                data={logsByDay[selectedDay]}
+                keyExtractor={(log) => log.id}
+                renderItem={({ item: log }) => (
+                    <LogItem
+                        item={log}
+                        checkBox={false}
+                        onDelete={(id) => {
+                            const updatedLogs = logs.filter((l) => l.id !== id);
+                            setLogs(updatedLogs);
+                            storeData('logs', JSON.stringify(updatedLogs));
+                        }}
+                        setOnEdit={() => {
+                            setActiveDay(selectedDay);
+                            setPlaceholders({
+                                exercise: log.exercise || 'Exercise',
+                                reps: log.reps || 'Reps',
+                                weight: log.weight || 'Weight (lbs)'
+                            });
+                        }}
+                        onEdit={true}
+                    />
                 )}
                 contentContainerStyle={styles.list}
+                ListEmptyComponent={<Text style={styles.empty}>No logs yet — add your first workout for this day.</Text>}
             />
             <ExerciseGeneration />
         </View>

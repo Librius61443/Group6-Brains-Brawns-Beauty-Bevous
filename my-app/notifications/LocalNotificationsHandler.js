@@ -45,7 +45,16 @@ export default function LocalNotificationsHandler() {
   return (
     <View>
       {notiOn ? (
-        <Text style={[styles.addButton, { alignSelf: 'flex-start', paddingHorizontal: 10, marginBottom: 20, backgroundColor: 'grey' }]}>Notification On</Text>
+        <TouchableOpacity
+          style={[styles.addButton, {backgroundColor: 'grey', alignSelf: 'flex-start', paddingBottom: 10, marginBottom: 20 }]}
+          onPress={() => {
+            Notifications.cancelAllScheduledNotificationsAsync();
+            alert('Notifications cancelled!');
+            setNoti(false);
+          }}
+        >
+          <Text style={[styles.NotificationButton , {backgroundColor: 'grey'}]}>Noti On</Text>
+        </TouchableOpacity>      
       ) : (
         <TouchableOpacity
           style={[styles.addButton, { alignSelf: 'flex-start', paddingBottom: 10, marginBottom: 20 }]}

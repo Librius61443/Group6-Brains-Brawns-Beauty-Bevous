@@ -37,7 +37,7 @@ function MainContainer() {
           // You can return any component that you like here!
           return <Ionicons name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: 'blue',
+        tabBarActiveTintColor: '#0a84ff',
         tabBarInactiveTintColor: 'grey',
         tabBarLabelStyle: { paddingBottom: 5, fontSize: 10 },
         tabBarStyle: { padding: 3, height: 100 },
