@@ -78,27 +78,50 @@ export const styles = StyleSheet.create({
     empty: { color: '#999', textAlign: 'center', marginTop: 20 },
     
     logItemRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    padding: 15,
-    borderRadius: 25,
-    marginBottom: 10,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        backgroundColor: '#fff',
+        padding: 15,
+        borderRadius: 30,
+        marginBottom: 10,
     },
 
     deleteBox: {
-    backgroundColor: 'red',
-    justifyContent: 'center',
-    alignItems: 'flex-end',
-    borderRadius: 30,
-    marginVertical: 6,
-    marginLeft: 10,
-    padding: 15
+        backgroundColor: 'red',
+        justifyContent: 'center',
+        alignItems: 'flex-end',
+        borderRadius: 30,
+        marginVertical: 6,
+        marginLeft: 10,
+        padding: 15,
+        minHeight: 70,
+        width: 'max-content'
     },
+    
     deleteText: {
-    color: '#fff',
-    fontWeight: 'bold',
+        color: '#fff',
+        fontWeight: 'bold',
     },
+
+    overlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.3)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+
+    popover: {
+        backgroundColor: 'white',
+        borderRadius: 10,
+        padding: 20,
+        shadowColor: '#000',
+        shadowOpacity: 0.3,
+        shadowOffset: { width: 0, height: 3 },
+        shadowRadius: 5,
+        elevation: 5,
+    },
+
+    popoverText: { fontSize: 16 },
 
 });

@@ -54,12 +54,24 @@ export default function CalendarScreen({ navigation }) {
     const [selectedDay, setSelectedDay] = useState(todayId);
     const [showDropdown, setShowDropdown] = useState(false);
     const [activeDay, setActiveDay] = useState(null); // used to show the add/edit form when equals selectedDay
+    // picker moved into ExerciseGeneration; CalendarScreen will receive generated group via onGenerate
 
+    const EXERCISES_BY_GROUP = {
+        Chest: ['Bench Press', 'Push-up', 'Chest Fly', 'Incline Press', 'Dips', 'Lower To Upper', 'Upper To Lower'],
+        Back: ['Pull-up', 'Bent-over Row', 'Lat Pulldown', 'Seated Cable Row', 'Deadlift', 'Dumbbell Row'],
+        Legs: ['Squat', 'Lunge', 'Leg Press', 'Leg Extension', 'Leg Curl', 'Calf Raise', 'Sumo Squat', 'Bulgarian Split Squat'],
+        Shoulders: ['Overhead Press', 'Lateral Raise', 'Front Raise', 'Reverse Fly'],
+        Arms: ['Bicep Curl', 'Tricep Dip', 'Hammer Curl', 'Preacher Curl', 'Forearm Curl', 'Tricep Pushdown', 'Diamond Push-up', 'Overhead Tricep Extension'],
+        Core: ['Plank', 'Crunch', 'Russian Twist', 'Leg Raise', 'Bicycle Crunch'],
+        'Full Body': ['Burpee', 'Thruster', 'Clean and Press']
+    };
     
     function addLog(newLog) {
-        setLogs([newLog, ...logs]);
-        storeData('logs', JSON.stringify([newLog, ...logs]));
-
+        setLogs(prev => {
+            const updated = [newLog, ...prev];
+            storeData("logs", JSON.stringify(updated));
+            return updated;
+        });
     }
 
     function editLog(editedLog) {
@@ -207,7 +219,24 @@ export default function CalendarScreen({ navigation }) {
                 contentContainerStyle={styles.list}
                 ListEmptyComponent={<Text style={styles.empty}>No logs yet — add your first workout for this day.</Text>}
             />
-            <ExerciseGeneration />
+            <ExerciseGeneration onGenerate={(group) => {
+                const choices = EXERCISES_BY_GROUP[group] || [`${group} Exercise`];
+                const pool = [...choices];
+
+                // shuffle pool (Fisher-Yates)
+                for (let i = pool.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [pool[i], pool[j]] = [pool[j], pool[i]];
+                }
+
+                const count = Math.min(4, pool.length);
+                for (let i = 0; i < count; i++) {
+                    const name = pool[i];
+                    const reps = `${8 + Math.floor(Math.random() * 6)}`; // 8-13 reps
+                    const weight = "0";
+                    addLog({ exercise: name, reps, weight, dayId: selectedDay, id: `${Date.now()}-${i}` });
+                }
+            }} />
         </View>
     );
 }
