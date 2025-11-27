@@ -25,6 +25,8 @@ export default function LocalNotificationsHandler() {
   }, []);
 
   const [notiOn, setNoti] = useState(false);
+  const [time, setTime] = useState(new Date());
+
 
   async function scheduleDailyNotification(hour, minute) {
   await Notifications.scheduleNotificationAsync({
@@ -46,7 +48,7 @@ export default function LocalNotificationsHandler() {
     <View>
       {notiOn ? (
         <TouchableOpacity
-          style={[styles.addButton, {backgroundColor: 'grey', alignSelf: 'flex-start', paddingBottom: 10, marginBottom: 20 }]}
+          style={[styles.hoverButton, {backgroundColor: 'grey', alignSelf: 'flex-start', paddingBottom: 10, marginBottom: 20, paddingVertical: 10, paddingHorizontal: 5, minWidth: 110, height: 50, justifyContent: 'center' }]}
           onPress={() => {
             Notifications.cancelAllScheduledNotificationsAsync();
             alert('Notifications cancelled!');
@@ -57,12 +59,12 @@ export default function LocalNotificationsHandler() {
         </TouchableOpacity>      
       ) : (
         <TouchableOpacity
-          style={[styles.addButton, { alignSelf: 'flex-start', paddingBottom: 10, marginBottom: 20 }]}
+          style={[styles.hoverButton, { alignSelf: 'flex-start', paddingBottom: 10, marginBottom: 20, minWidth: 110, height: 50, justifyContent: 'center', paddingVertical: 10, paddingHorizontal: 5 }]}
           onPress={() => {
-            // const hours = time.getHours();
-            // const minutes = time.getMinutes();
-          scheduleDailyNotification(15, 8);
-          alert('Notification scheduled for 15:08 daily!');
+          const hours = time.getHours();
+          const minutes = time.getMinutes();
+          scheduleDailyNotification(hours, minutes);
+          alert(`Notification scheduled for ${hours}:${minutes < 10 ? "0" + minutes : minutes} daily!`);
           setNoti(true);
         }}
       >

@@ -47,6 +47,7 @@ export default function CalendarScreen({ navigation }) {
     );
 
     const [logs, setLogs] = useState([]);
+    const [editingId, setEditingId] = useState(null);
     // const [showForm, setShowForm] = useState(false);
 
     // default selected day = today (0 = Sunday ... 6 = Saturday)
@@ -75,7 +76,7 @@ export default function CalendarScreen({ navigation }) {
     }
 
     function editLog(editedLog) {
-        const updatedLogs = logs.map(log => log.exercise === editedLog.exercise ? editedLog : log);
+        const updatedLogs = logs.map(log => log.id === editedLog.id ? editedLog : log);
         setLogs(updatedLogs);
         storeData('logs', JSON.stringify(updatedLogs));
     }
@@ -170,19 +171,22 @@ export default function CalendarScreen({ navigation }) {
             {activeDay === selectedDay ? (
                 <View>
                     <LogForm
-                        onCancel={() => setActiveDay(null)}
+                        // force remount whenever placeholders (or editingId) change so the form reflects new placeholders
+                        key={`form-${placeholders.exercise}-${placeholders.reps}-${placeholders.weight}-${editingId || ''}`}
+                        onCancel={() => {
+                            setActiveDay(null);
+                            setEditingId(null);
+                        }}
                         onSave={(newLog) => {
-                            const newExercise = newLog.exercise.trim().toLowerCase();
-                            const alreadyExists = logs.some(
-                                (log) => log.dayId === selectedDay && log.exercise.trim().toLowerCase() === newExercise
-                            );
-
-                            if (alreadyExists) {
-                                editLog({ ...newLog, dayId: selectedDay, id: logs.find(log => log.dayId === selectedDay && log.exercise.trim().toLowerCase() === newExercise).id });
+                            // If editingId is set, update that specific log
+                            if (editingId) {
+                                editLog({ ...newLog, dayId: selectedDay, id: editingId });
+                                setEditingId(null);
                                 setActiveDay(null);
                                 return;
                             }
 
+                            // Otherwise add as new
                             addLog({ ...newLog, dayId: selectedDay, id: Date.now().toString() });
                             setActiveDay(null);
                         }}
@@ -197,24 +201,31 @@ export default function CalendarScreen({ navigation }) {
                 data={logsByDay[selectedDay]}
                 keyExtractor={(log) => log.id}
                 renderItem={({ item: log }) => (
-                    <LogItem
-                        item={log}
-                        checkBox={false}
-                        onDelete={(id) => {
-                            const updatedLogs = logs.filter((l) => l.id !== id);
-                            setLogs(updatedLogs);
-                            storeData('logs', JSON.stringify(updatedLogs));
-                        }}
-                        setOnEdit={() => {
-                            setActiveDay(selectedDay);
-                            setPlaceholders({
-                                exercise: log.exercise || 'Exercise',
-                                reps: log.reps || 'Reps',
-                                weight: log.weight || 'Weight (lbs)'
-                            });
-                        }}
-                        onEdit={true}
-                    />
+                            <LogItem
+                                item={log}
+                                checkBox={false}
+                                onDelete={(id) => {
+                                    const updatedLogs = logs.filter((l) => l.id !== id);
+                                    setLogs(updatedLogs);
+                                    storeData('logs', JSON.stringify(updatedLogs));
+                                    // clear editingId if the deleted item was being edited
+                                    if (editingId === id) setEditingId(null);
+                                }}
+                                setOnEdit={(id) => {
+                                    // find the log by id and populate the form
+                                    const toEdit = logs.find(l => l.id === id);
+                                    if (toEdit) {
+                                        setActiveDay(toEdit.dayId);
+                                        setPlaceholders({
+                                            exercise: toEdit.exercise || 'Exercise',
+                                            reps: toEdit.reps || 'Reps',
+                                            weight: toEdit.weight || 'Weight (lbs)'
+                                        });
+                                        setEditingId(id);
+                                    }
+                                }}
+                                onEdit={true}
+                            />
                 )}
                 contentContainerStyle={styles.list}
                 ListEmptyComponent={<Text style={styles.empty}>No logs yet — add your first workout for this day.</Text>}
@@ -232,9 +243,9 @@ export default function CalendarScreen({ navigation }) {
                 const count = Math.min(4, pool.length);
                 for (let i = 0; i < count; i++) {
                     const name = pool[i];
-                    const reps = `${8 + Math.floor(Math.random() * 6)}`; // 8-13 reps
-                    const weight = "0";
-                    addLog({ exercise: name, reps, weight, dayId: selectedDay, id: `${Date.now()}-${i}` });
+                    const reps = 8 + Math.floor(Math.random() * 6); // 8-13 reps
+                    const weight = 0;
+                    addLog({ exercise: name, reps: reps, weight: weight, dayId: selectedDay, id: `${Date.now()}-${i}` });
                 }
             }} />
         </View>
