@@ -41,7 +41,9 @@ export default function HomeScreen() {
         const raw = await AsyncStorage.getItem('progress');
         const progress = raw ? JSON.parse(raw) : [];
 
-        const todayIso = new Date().toISOString().split('T')[0];
+        // compute local date key (YYYY-MM-DD) to avoid UTC timezone shifts
+        const now = new Date();
+        const todayLocal = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
         if (checked) {
           const entry = {
@@ -51,16 +53,17 @@ export default function HomeScreen() {
             reps: item.reps,
             weight: item.weight,
             loggedAt: new Date().toISOString(),
+            loggedDate: todayLocal,
             dayId: item.dayId,
           };
           const updated = [entry, ...progress];
           await AsyncStorage.setItem('progress', JSON.stringify(updated));
           console.log('Progress entry added', entry);
         } else {
-          // remove progress entries for this item logged today
+          // remove progress entries for this item logged today (using local date key)
           const filtered = progress.filter(p => {
-            const pDate = (p.loggedAt || '').split('T')[0];
-            return !(p.itemId === item.id && pDate === todayIso);
+            const pDate = p.loggedDate || ((p.loggedAt || '').split('T')[0]);
+            return !(p.itemId === item.id && pDate === todayLocal);
           });
           await AsyncStorage.setItem('progress', JSON.stringify(filtered));
           console.log('Progress entries removed for', item.id);

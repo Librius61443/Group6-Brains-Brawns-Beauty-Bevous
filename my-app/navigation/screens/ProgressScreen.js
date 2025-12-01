@@ -16,59 +16,43 @@ export default function ProgressScreen({ navigation }) {
             const list = raw ? JSON.parse(raw) : [];
             setProgress(list);
 
-            // ----------------------------
-            // 1. Build daily progression map
-            // ----------------------------
-            const map = {}; // { "2025-01-09": 450, ... }
+            // Helper: local YYYY-MM-DD key
+            const toLocalKey = (dateObj) => `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
 
+            const getDateKey = (p) => {
+                if (!p) return '';
+                if (p.loggedDate) return p.loggedDate;
+                if (p.loggedAt) {
+                    const d = new Date(p.loggedAt);
+                    return toLocalKey(d);
+                }
+                return '';
+            };
+
+            // Build progression score (weight * reps) per local date
+            const scoreMap = {};
             list.forEach(log => {
-                const date = (log.loggedAt || '').split("T")[0];
+                const key = getDateKey(log) || toLocalKey(new Date());
                 const weight = Number(log.weight) || 0;
                 const reps = Number(log.reps) || 0;
-
-                // progression score = weight × reps
                 const score = weight * reps;
-
-                if (!map[date]) map[date] = 0;
-                map[date] += score;
+                scoreMap[key] = (scoreMap[key] || 0) + score;
             });
 
-            // ----------------------------
-            // 2. Build last 7 days timeline
-            // ----------------------------
+            // Last 7 days labels (local keys)
             const now = new Date();
-            const last7 = [];
-
-            for (let i = 6; i >= 0; i--) {
-                const d = new Date(now);
-                d.setDate(now.getDate() - i);
-                const key = d.toISOString().split("T")[0];
-
-                last7.push({
-                    date: key,
-                    score: map[key] || 0
-                });
-            }
-
-            setGeneralProgress(last7);
-
-            // ----------------------------
-            // 3. Keep your original count trend
-            // ----------------------------
             const labels = [];
             for (let i = 6; i >= 0; i--) {
                 const d = new Date(now);
                 d.setDate(now.getDate() - i);
-                labels.push(d.toISOString().split('T')[0]);
+                labels.push(toLocalKey(d));
             }
 
-            const counts = labels.map(lbl =>
-                list.filter(p => (p.loggedAt || '').split('T')[0] === lbl).length
-            );
+            const counts = labels.map(lbl => list.filter(p => getDateKey(p) === lbl).length);
+            setCountsByDay(labels.map((lbl, idx) => ({ date: lbl, count: counts[idx] })));
 
-            setCountsByDay(
-                labels.map((lbl, idx) => ({ date: lbl, count: counts[idx] }))
-            );
+            const last7 = labels.map(key => ({ date: key, score: scoreMap[key] || 0 }));
+            setGeneralProgress(last7);
 
         } catch (e) {
             console.error('Failed loading progress', e);
@@ -93,7 +77,6 @@ export default function ProgressScreen({ navigation }) {
 
     return (
         <View style={{ flex: 1 }}>
-            {/* HEADER */}
             <View style={{ padding: 16, borderBottomWidth: 1, borderColor: '#ddd' }}>
                 <Text
                     onPress={() => navigation.navigate('Home')}
@@ -103,9 +86,6 @@ export default function ProgressScreen({ navigation }) {
                 </Text>
             </View>
 
-            {/* -------------------------------------- */}
-            {/* GENERAL PROGRESSION LINE GRAPH (NEW)   */}
-            {/* -------------------------------------- */}
             <View style={{ paddingHorizontal: 12, paddingTop: 16 }}>
                 <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 10 }}>
                     Overall Muscle Progression
@@ -139,7 +119,7 @@ export default function ProgressScreen({ navigation }) {
                             }
                         }}
                         bezier
-                        style={{ borderRadius: 12, paddingRight: 36 }}
+                        style={{ borderRadius: 12, paddingHorizontal: 10 }}
                     />
                 ) : (
                     <Text style={{ color: "#777" }}>No progression data yet.</Text>
