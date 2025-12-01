@@ -5,12 +5,12 @@ import { NavigationContainer } from '@react-navigation/native';
 // Screens
 import CalendarScreen from './screens/CalendarScreen';
 import HomeScreen from './screens/HomeScreen';
-import SettingsScreen from './screens/SettingsScreen';
+import ProgressScreen from './screens/ProgressScreen';
 
 //Screen names
 const homeName = "Gym Log";
 const calendarName = "Schedule";
-const settingsName = "Settings";
+const progressName = "Progress";
 
 const Tab = createBottomTabNavigator();
 
@@ -30,8 +30,8 @@ function MainContainer() {
           } else if (rn === calendarName) {
             iconName = focused ? 'calendar' : 'calendar-outline';
 
-          } else if (rn === settingsName) {
-            iconName = focused ? 'settings' : 'settings-outline';
+          } else if (rn === progressName) {
+            iconName = focused ? 'bar-chart' : 'bar-chart-outline';
           }
 
           // You can return any component that you like here!
@@ -46,7 +46,7 @@ function MainContainer() {
 
         <Tab.Screen name={homeName} component={HomeScreen} />
         <Tab.Screen name={calendarName} component={CalendarScreen} />
-        <Tab.Screen name={settingsName} component={SettingsScreen} />
+        <Tab.Screen name={progressName} component={ProgressScreen} />
 
       </Tab.Navigator>
     </NavigationContainer>

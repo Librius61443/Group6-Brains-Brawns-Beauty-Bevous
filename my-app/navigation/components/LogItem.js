@@ -6,7 +6,7 @@ import { PanGestureHandler, State } from 'react-native-gesture-handler';
 import { styles } from '../../styles/homeStyles';
 
 
-export default function LogItem({ item, checkBox, onDelete, setOnEdit, onEdit}) {
+export default function LogItem({ item, checkBox, onDelete, setOnEdit, onEdit, onCheckedChange }) {
 
     const [checked, setChecked] = useState(false);
 
@@ -95,7 +95,10 @@ export default function LogItem({ item, checkBox, onDelete, setOnEdit, onEdit}) 
 
                     {checkBox ? (
                         <View style={{ marginRight: 10 }}>
-                            <Checkbox value={checked} onValueChange={setChecked} />
+                            <Checkbox value={checked} onValueChange={(val) => {
+                                setChecked(val);
+                                if (typeof onCheckedChange === 'function') onCheckedChange(item, val);
+                            }} />
                         </View>
                     ) : null}
                     {onEdit ? (

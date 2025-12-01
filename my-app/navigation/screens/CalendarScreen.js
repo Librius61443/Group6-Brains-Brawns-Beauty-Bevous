@@ -244,7 +244,7 @@ export default function CalendarScreen({ navigation }) {
                 for (let i = 0; i < count; i++) {
                     const name = pool[i];
                     const reps = 8 + Math.floor(Math.random() * 6); // 8-13 reps
-                    const weight = 0;
+                    const weight = 10;
                     addLog({ exercise: name, reps: reps, weight: weight, dayId: selectedDay, id: `${Date.now()}-${i}` });
                 }
             }} />

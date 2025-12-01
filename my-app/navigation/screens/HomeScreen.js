@@ -35,6 +35,41 @@ export default function HomeScreen() {
       }
     };
 
+    // When a checkbox is toggled in the Home list, record or remove a "progress" entry
+    const handleCheckedChange = async (item, checked) => {
+      try {
+        const raw = await AsyncStorage.getItem('progress');
+        const progress = raw ? JSON.parse(raw) : [];
+
+        const todayIso = new Date().toISOString().split('T')[0];
+
+        if (checked) {
+          const entry = {
+            id: `${item.id}-${Date.now()}`,
+            itemId: item.id,
+            exercise: item.exercise,
+            reps: item.reps,
+            weight: item.weight,
+            loggedAt: new Date().toISOString(),
+            dayId: item.dayId,
+          };
+          const updated = [entry, ...progress];
+          await AsyncStorage.setItem('progress', JSON.stringify(updated));
+          console.log('Progress entry added', entry);
+        } else {
+          // remove progress entries for this item logged today
+          const filtered = progress.filter(p => {
+            const pDate = (p.loggedAt || '').split('T')[0];
+            return !(p.itemId === item.id && pDate === todayIso);
+          });
+          await AsyncStorage.setItem('progress', JSON.stringify(filtered));
+          console.log('Progress entries removed for', item.id);
+        }
+      } catch (e) {
+        console.error('Error updating progress', e);
+      }
+    };
+
     useFocusEffect(
       useCallback(() => {
         async function fetchLogs() {
@@ -72,18 +107,19 @@ export default function HomeScreen() {
                   renderItem={({ item: log }) => (
                     <View>
                         <LogItem 
-                            item={log} 
-                            checkBox={true} 
-                            onDelete={(id) => {
-                            // Filter out deleted log
-                            const updatedLogs = logs.filter((l) => l.id !== id);
-                            setLogs(updatedLogs);
+                          item={log} 
+                          checkBox={true} 
+                          onDelete={(id) => {
+                          // Filter out deleted log
+                          const updatedLogs = logs.filter((l) => l.id !== id);
+                          setLogs(updatedLogs);
 
-                            // Persist changes
-                            storeData('logs', JSON.stringify(updatedLogs));
-                            }}
-                            onEdit={false}
-                            setOnEdit={() => {}}
+                          // Persist changes
+                          storeData('logs', JSON.stringify(updatedLogs));
+                          }}
+                          onEdit={false}
+                          setOnEdit={() => {}}
+                          onCheckedChange={handleCheckedChange}
                         />
                     </View>
                 )}
