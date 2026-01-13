@@ -15,6 +15,6 @@
 
 ## Demo
 
-https://github.com/user-attachments/assets/14215254-61eb-401a-a855-d05141232a66
+- [Video Demo] (https://github.com/user-attachments/assets/14215254-61eb-401a-a855-d05141232a66)
 <img width="645" height="1398" alt="IMG_7578" src="https://github.com/user-attachments/assets/eece9092-1121-4546-a863-169806ca724f" />
 
