@@ -1,6 +1,6 @@
 # Group6-Brains-Brawns-Beauty-Bevous
 # Health App to record data
-##HealthApp
+## HealthApp
 **Project Docs**
 - **Wiki**
 - [Wiki Home] (https://github.com/Librius61443/Group6-Brains-Brawns-Beauty-Bevous/wiki)
@@ -12,3 +12,9 @@
 - [Design: Architecture & Components] (docs/design/architecture.md)
 - [Design: Data & Content] (docs/design/data-content.md)
 - [Design: Risks & Constraints] (docs/design/risks-contraints.md)
+
+## Demo
+
+https://github.com/user-attachments/assets/14215254-61eb-401a-a855-d05141232a66
+<img width="645" height="1398" alt="IMG_7578" src="https://github.com/user-attachments/assets/eece9092-1121-4546-a863-169806ca724f" />
+
